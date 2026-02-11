@@ -1,0 +1,17 @@
+var gamesConfig = {
+  "arena_fps": {
+    "maxPlayers": 8,
+    "tickRate": 20,
+    "systems": ["movement", "shooting", "health", "scoring", "killcam"]
+  },
+  "racing": {
+    "maxPlayers": 6,
+    "tickRate": 30,
+    "systems": ["movement", "scoring"]
+  },
+  "topdown_shooter": {
+    "maxPlayers": 4,
+    "tickRate": 20,
+    "systems": ["movement", "shooting", "health", "scoring", "inventory"]
+  }
+};

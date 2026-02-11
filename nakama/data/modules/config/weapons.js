@@ -1,0 +1,12 @@
+var weaponsConfig = {
+  "assault_rifle": {
+    "damage": 10,
+    "fireRate": 0.1,
+    "range": 50
+  },
+  "pistol": {
+    "damage": 15,
+    "fireRate": 0.5,
+    "range": 30
+  }
+};
