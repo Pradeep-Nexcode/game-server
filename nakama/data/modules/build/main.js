@@ -1300,40 +1300,16 @@ var ServerModule = (function (exports) {
         return JSON.stringify({ success: false, message: "Store not implemented yet" });
     }
 
-    function matchInit(ctx, logger, nk, params) {
-        return matchInit$1(ctx, logger, nk, params);
-    }
-    function matchJoinAttempt(ctx, logger, nk, dispatcher, tick, state, presence, metadata) {
-        return matchJoinAttempt$1(ctx, logger, nk, dispatcher, tick, state, presence, metadata);
-    }
-    function matchJoin(ctx, logger, nk, dispatcher, tick, state, presences) {
-        return matchJoin$1(ctx, logger, nk, dispatcher, tick, state, presences);
-    }
-    function matchLeave(ctx, logger, nk, dispatcher, tick, state, presences) {
-        return matchLeave$1(ctx, logger, nk, dispatcher, tick, state, presences);
-    }
-    function matchLoop(ctx, logger, nk, dispatcher, tick, state, messages) {
-        return matchLoop$1(ctx, logger, nk, dispatcher, tick, state, messages);
-    }
-    function matchTerminate(ctx, logger, nk, dispatcher, tick, state, graceSeconds) {
-        return matchTerminate$1(ctx, logger, nk, dispatcher, tick, state);
-    }
-    function matchSignal(ctx, logger, nk, dispatcher, tick, state, data) {
-        return matchSignal$1(ctx, logger, nk, dispatcher, tick, state, data);
-    }
-    function matchmakerMatched(ctx, logger, nk, matchedUsers) {
-        return onMatched(ctx, logger, nk, matchedUsers);
-    }
     // Helper to register the match handler
     function registerMatch(initializer, name) {
         initializer.registerMatch(name, {
-            matchInit: globalThis.matchInit,
-            matchJoinAttempt: globalThis.matchJoinAttempt,
-            matchJoin: globalThis.matchJoin,
-            matchLeave: globalThis.matchLeave,
-            matchLoop: globalThis.matchLoop,
-            matchTerminate: globalThis.matchTerminate,
-            matchSignal: globalThis.matchSignal
+            matchInit: matchInit,
+            matchJoinAttempt: matchJoinAttempt,
+            matchJoin: matchJoin,
+            matchLeave: matchLeave,
+            matchLoop: matchLoop,
+            matchTerminate: matchTerminate,
+            matchSignal: matchSignal
         });
     }
     // Entry Point

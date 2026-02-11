@@ -45,13 +45,13 @@ export function matchmakerMatched(ctx: nkruntime.Context, logger: nkruntime.Logg
 // Helper to register the match handler
 function registerMatch(initializer: nkruntime.Initializer, name: string) {
     initializer.registerMatch(name, {
-        matchInit: (globalThis as any).matchInit,
-        matchJoinAttempt: (globalThis as any).matchJoinAttempt,
-        matchJoin: (globalThis as any).matchJoin,
-        matchLeave: (globalThis as any).matchLeave,
-        matchLoop: (globalThis as any).matchLoop,
-        matchTerminate: (globalThis as any).matchTerminate,
-        matchSignal: (globalThis as any).matchSignal
+        matchInit,
+        matchJoinAttempt,
+        matchJoin,
+        matchLeave,
+        matchLoop,
+        matchTerminate,
+        matchSignal
     });
 }
 
@@ -62,7 +62,7 @@ export function InitModule(ctx: nkruntime.Context, logger: nkruntime.Logger, nk:
     // Register the generic match handler
     // This handler supports all game types via config
     registerMatch(initializer, "game_match");
-
+    
     // Register Matchmaker Matched Hook
     (initializer as any).registerMatchmakerMatched((globalThis as any).matchmakerMatched);
 
