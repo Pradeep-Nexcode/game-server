@@ -2,10 +2,10 @@
   "name": "nakama-project",
   "version": "1.0.0",
   "description": "Nakama server project",
-  "main": "build/index.js",
+  "main": "build/main.js",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
     "typecheck": "tsc --noEmit",
     "prestart": "npm run build",
     "start": "docker-compose up",
@@ -13,6 +13,12 @@
     "logs": "docker-compose logs -f nakama"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "rollup": "^4.57.1",
+    "tslib": "^2.8.1",
     "typescript": "^5.0.0"
   }
 }

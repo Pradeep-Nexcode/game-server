@@ -113,7 +113,7 @@ export function equipCosmetic(nk: nkruntime.Nakama, userId: string, slot: "playe
     }
 
     // 2. Check type compatibility
-    const item = catalog.find(c => c.id === cosmeticId);
+    const item = catalog.find((c: CosmeticItem) => c.id === cosmeticId);
     if (!item || item.type !== slot) {
         return false;
     }

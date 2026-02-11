@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es2015",
     "module": "commonjs",
-    "outDir": "./data/build",
+    "outDir": "./data/modules/build",
     "rootDir": "./data/modules",
     "strict": true,
     "esModuleInterop": true,
@@ -12,5 +12,8 @@
   },
   "include": [
     "data/modules/**/*"
+  ],
+  "exclude": [
+    "data/modules/build"
   ]
 }
