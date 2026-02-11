@@ -18,6 +18,7 @@ export default {
       'function matchLoop(ctx, logger, nk, dispatcher, tick, state, messages) { return ServerModule.matchLoop(ctx, logger, nk, dispatcher, tick, state, messages); }',
       'function matchTerminate(ctx, logger, nk, dispatcher, tick, state, graceSeconds) { return ServerModule.matchTerminate(ctx, logger, nk, dispatcher, tick, state, graceSeconds); }',
       'function matchSignal(ctx, logger, nk, dispatcher, tick, state, data) { return ServerModule.matchSignal(ctx, logger, nk, dispatcher, tick, state, data); }',
+      'function matchmakerMatched(ctx, logger, nk, matchedUsers) { return ServerModule.matchmakerMatched(ctx, logger, nk, matchedUsers); }',
     ].join('\n')
   },
   plugins: [
