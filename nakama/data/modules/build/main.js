@@ -1300,30 +1300,6 @@ var ServerModule = (function (exports) {
         return JSON.stringify({ success: false, message: "Store not implemented yet" });
     }
 
-    function matchInit(ctx, logger, nk, params) {
-        return matchInit$1(ctx, logger, nk, params);
-    }
-    function matchJoinAttempt(ctx, logger, nk, dispatcher, tick, state, presence, metadata) {
-        return matchJoinAttempt$1(ctx, logger, nk, dispatcher, tick, state, presence, metadata);
-    }
-    function matchJoin(ctx, logger, nk, dispatcher, tick, state, presences) {
-        return matchJoin$1(ctx, logger, nk, dispatcher, tick, state, presences);
-    }
-    function matchLeave(ctx, logger, nk, dispatcher, tick, state, presences) {
-        return matchLeave$1(ctx, logger, nk, dispatcher, tick, state, presences);
-    }
-    function matchLoop(ctx, logger, nk, dispatcher, tick, state, messages) {
-        return matchLoop$1(ctx, logger, nk, dispatcher, tick, state, messages);
-    }
-    function matchTerminate(ctx, logger, nk, dispatcher, tick, state, graceSeconds) {
-        return matchTerminate$1(ctx, logger, nk, dispatcher, tick, state);
-    }
-    function matchSignal(ctx, logger, nk, dispatcher, tick, state, data) {
-        return matchSignal$1(ctx, logger, nk, dispatcher, tick, state, data);
-    }
-    function matchmakerMatched(ctx, logger, nk, matchedUsers) {
-        return onMatched(ctx, logger, nk, matchedUsers);
-    }
     // Helper to register the match handler
     function registerMatch(initializer, name) {
         initializer.registerMatch(name, {
@@ -1343,7 +1319,7 @@ var ServerModule = (function (exports) {
         // This handler supports all game types via config
         registerMatch(initializer, "game_match");
         // Register Matchmaker Matched Hook
-        initializer.registerMatchmakerMatched(matchmakerMatched);
+        initializer.registerMatchmakerMatched(globalThis.matchmakerMatched);
         // Register LiveOps RPCs
         initializer.registerRpc("admin_start_season", rpcAdminStartSeason);
         initializer.registerRpc("admin_end_season", rpcAdminEndSeason);
@@ -1367,12 +1343,12 @@ var ServerModule = (function (exports) {
     return exports;
 
 })({});
-function InitModule(ctx, logger, nk, initializer) { return ServerModule.InitModule(ctx, logger, nk, initializer); }
-function matchInit(ctx, logger, nk, params) { return ServerModule.matchInit(ctx, logger, nk, params); }
-function matchJoinAttempt(ctx, logger, nk, dispatcher, tick, state, presence, metadata) { return ServerModule.matchJoinAttempt(ctx, logger, nk, dispatcher, tick, state, presence, metadata); }
-function matchJoin(ctx, logger, nk, dispatcher, tick, state, presence) { return ServerModule.matchJoin(ctx, logger, nk, dispatcher, tick, state, presence); }
-function matchLeave(ctx, logger, nk, dispatcher, tick, state, presences) { return ServerModule.matchLeave(ctx, logger, nk, dispatcher, tick, state, presences); }
-function matchLoop(ctx, logger, nk, dispatcher, tick, state, messages) { return ServerModule.matchLoop(ctx, logger, nk, dispatcher, tick, state, messages); }
-function matchTerminate(ctx, logger, nk, dispatcher, tick, state, graceSeconds) { return ServerModule.matchTerminate(ctx, logger, nk, dispatcher, tick, state, graceSeconds); }
-function matchSignal(ctx, logger, nk, dispatcher, tick, state, data) { return ServerModule.matchSignal(ctx, logger, nk, dispatcher, tick, state, data); }
-function matchmakerMatched(ctx, logger, nk, matchedUsers) { return ServerModule.matchmakerMatched(ctx, logger, nk, matchedUsers); }
+globalThis.InitModule = function InitModule(ctx, logger, nk, initializer) { return ServerModule.InitModule(ctx, logger, nk, initializer); };
+globalThis.matchInit = function matchInit(ctx, logger, nk, params) { return ServerModule.matchInit(ctx, logger, nk, params); };
+globalThis.matchJoinAttempt = function matchJoinAttempt(ctx, logger, nk, dispatcher, tick, state, presence, metadata) { return ServerModule.matchJoinAttempt(ctx, logger, nk, dispatcher, tick, state, presence, metadata); };
+globalThis.matchJoin = function matchJoin(ctx, logger, nk, dispatcher, tick, state, presence) { return ServerModule.matchJoin(ctx, logger, nk, dispatcher, tick, state, presence); };
+globalThis.matchLeave = function matchLeave(ctx, logger, nk, dispatcher, tick, state, presences) { return ServerModule.matchLeave(ctx, logger, nk, dispatcher, tick, state, presences); };
+globalThis.matchLoop = function matchLoop(ctx, logger, nk, dispatcher, tick, state, messages) { return ServerModule.matchLoop(ctx, logger, nk, dispatcher, tick, state, messages); };
+globalThis.matchTerminate = function matchTerminate(ctx, logger, nk, dispatcher, tick, state, graceSeconds) { return ServerModule.matchTerminate(ctx, logger, nk, dispatcher, tick, state, graceSeconds); };
+globalThis.matchSignal = function matchSignal(ctx, logger, nk, dispatcher, tick, state, data) { return ServerModule.matchSignal(ctx, logger, nk, dispatcher, tick, state, data); };
+globalThis.matchmakerMatched = function matchmakerMatched(ctx, logger, nk, matchedUsers) { return ServerModule.matchmakerMatched(ctx, logger, nk, matchedUsers); };

@@ -62,9 +62,9 @@ export function InitModule(ctx: nkruntime.Context, logger: nkruntime.Logger, nk:
     // Register the generic match handler
     // This handler supports all game types via config
     registerMatch(initializer, "game_match");
-
+    
     // Register Matchmaker Matched Hook
-    (initializer as any).registerMatchmakerMatched(matchmakerMatched);
+    (initializer as any).registerMatchmakerMatched((globalThis as any).matchmakerMatched);
 
     // Register LiveOps RPCs
     initializer.registerRpc("admin_start_season", rpcAdminStartSeason);
