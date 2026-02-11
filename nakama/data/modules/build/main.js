@@ -1300,10 +1300,24 @@ var ServerModule = (function (exports) {
         return JSON.stringify({ success: false, message: "Store not implemented yet" });
     }
 
+    // Helper to register the match handler
+    function registerMatch(initializer, name) {
+        initializer.registerMatch(name, {
+            matchInit: matchInit,
+            matchJoinAttempt: matchJoinAttempt,
+            matchJoin: matchJoin,
+            matchLeave: matchLeave,
+            matchLoop: matchLoop,
+            matchTerminate: matchTerminate,
+            matchSignal: matchSignal
+        });
+    }
     // Entry Point
     function InitModule(ctx, logger, nk, initializer) {
         logger.info("Initializing Nakama Game Server Modules...");
-        // Temporarily skip match registration to allow server startup
+        // Register the generic match handler
+        // This handler supports all game types via config
+        registerMatch(initializer, "game_match");
         // Register Matchmaker Matched Hook
         initializer.registerMatchmakerMatched(onMatched);
         // Register LiveOps RPCs
