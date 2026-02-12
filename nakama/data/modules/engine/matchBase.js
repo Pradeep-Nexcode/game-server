@@ -6,7 +6,7 @@ var systemRegistry = {
     "killcam": killcamSystem,
 };
 
-var GameMatch = {
+globalThis.GameMatch = {
     matchInit: function(ctx, logger, nk, params) {
         if (logger) logger.info(`Match Init: ${ctx.matchId}`);
 
@@ -27,6 +27,8 @@ var GameMatch = {
 
         const state = {
             players: {},
+            hostId: null,
+            phase: "lobby", // lobby | in_game
             projectiles: [],
             gameStartTime: Date.now(),
             gameEndTime: 0,
@@ -75,6 +77,12 @@ var GameMatch = {
 
             const inventory = CosmeticsSystem.getInventory(nk, presence.userId);
 
+            // First player to join becomes host if no host exists
+            if (!state.hostId && !isSpectator) {
+                state.hostId = presence.userId;
+                if (logger) logger.info(`First player joined. Assigned Host: ${presence.username} (${presence.userId})`);
+            }
+
             state.players[presence.sessionId] = {
                 sessionId: presence.sessionId,
                 userId: presence.userId,
@@ -88,6 +96,7 @@ var GameMatch = {
                 cosmetics: inventory.equipped,
                 isDead: false,
                 isSpectator: isSpectator,
+                ready: false,
                 lastInputSeq: 0,
                 lastAckTick: 0,
                 anticheat: AntiCheat.createAntiCheatState()
@@ -97,20 +106,144 @@ var GameMatch = {
                  const spawnIndex = Object.keys(state.players).length % state.map.spawnPoints.length;
                  state.players[presence.sessionId].position = state.map.spawnPoints[spawnIndex];
             }
+            
+            if (logger) logger.info(`Player joined: ${presence.username} (Session: ${presence.sessionId})`);
         }
+
+        // Always broadcast full state after join
+        const broadcastPayload = JSON.stringify({
+            players: state.players,
+            hostId: state.hostId,
+            phase: state.phase,
+            tick: tick
+        });
+        dispatcher.broadcastMessage(100, broadcastPayload);
+        if (logger) logger.info(`Broadcasted state after join: ${broadcastPayload}`);
+
         return { state };
     },
 
     matchLeave: function(ctx, logger, nk, dispatcher, tick, state, presences) {
         for (const presence of presences) {
-            delete state.players[presence.sessionId];
+            const player = state.players[presence.sessionId];
+            if (player) {
+                if (logger) logger.info(`Player left: ${player.username} (Session: ${presence.sessionId})`);
+                delete state.players[presence.sessionId];
+                
+                // If the host left, migrate host to the next available player
+                if (state.hostId === presence.userId) {
+                    const remainingPlayers = Object.values(state.players).filter(p => !p.isSpectator);
+                    if (remainingPlayers.length > 0) {
+                        state.hostId = remainingPlayers[0].userId;
+                        if (logger) logger.info(`Host left. Migrated Host to: ${remainingPlayers[0].username} (${state.hostId})`);
+                    } else {
+                        state.hostId = null;
+                        if (logger) logger.info("Host left and no players remain. Host cleared.");
+                    }
+                }
+            }
         }
+
+        // Always broadcast full state after leave
+        const broadcastPayload = JSON.stringify({
+            players: state.players,
+            hostId: state.hostId,
+            phase: state.phase,
+            tick: tick
+        });
+        dispatcher.broadcastMessage(100, broadcastPayload);
+        if (logger) logger.info(`Broadcasted state after leave: ${broadcastPayload}`);
+
         return { state };
     },
 
     matchLoop: function(ctx, logger, nk, dispatcher, tick, state, messages) {
         state.tick = tick;
         const deltaTime = 1 / state.config.tickRate;
+
+        // Handle Messages
+        for (const message of messages) {
+            const player = state.players[message.sender.sessionId];
+            if (!player) continue;
+
+            if (logger) logger.info(`Received message opCode: ${message.opCode} from ${player.username}`);
+
+            switch (message.opCode) {
+                case 2: // READY_TOGGLE
+                    if (state.phase !== "lobby") break;
+                    
+                    try {
+                        const data = JSON.parse(nk.binaryToString(message.data));
+                        if (data.type === "READY") {
+                            player.ready = !player.ready;
+                            if (logger) logger.info(`READY from user: ${player.username} (New status: ${player.ready})`);
+                            
+                            // 🔥 Authoritative Broadcast immediately after ready toggle
+                            const readyPayload = JSON.stringify({
+                                players: state.players,
+                                hostId: state.hostId,
+                                phase: state.phase,
+                                tick: tick
+                            });
+                            dispatcher.broadcastMessage(100, readyPayload);
+                        }
+                    } catch (e) {
+                        if (logger) logger.error(`Error parsing READY message: ${e.message}`);
+                    }
+                    break;
+
+                case 3: // START_GAME
+                    if (player.userId !== state.hostId) {
+                        if (logger) logger.warn(`Player ${player.username} tried to start but is NOT Host (HostId: ${state.hostId})`);
+                        break;
+                    }
+                    if (state.phase !== "lobby") break;
+
+                    const nonSpectators = Object.values(state.players).filter(p => !p.isSpectator);
+                    const allReady = nonSpectators.length >= 2 && nonSpectators.every(p => p.ready);
+
+                    if (allReady) {
+                        state.phase = "in_game";
+                        state.gameStartTime = Date.now();
+                        if (logger) logger.info("Game Started! All conditions met.");
+                        
+                        // 🔥 Authoritative Broadcast after phase change
+                        dispatcher.broadcastMessage(100, JSON.stringify({
+                            players: state.players,
+                            hostId: state.hostId,
+                            phase: state.phase,
+                            tick: tick
+                        }));
+                    } else {
+                        if (logger) logger.warn(`Start failed: Players=${nonSpectators.length}, AllReady=${allReady}`);
+                        dispatcher.broadcastMessage(OpCode.ERROR, JSON.stringify({
+                            message: nonSpectators.length < 2 ? "Need at least 2 players" : "All players must be ready"
+                        }), [message.sender]);
+                    }
+                    break;
+
+                case OpCode.CHAT: // Handle Chat (only broadcast if in_game)
+                    try {
+                        const chatData = JSON.parse(nk.binaryToString(message.data));
+                        const payload = JSON.stringify({
+                            senderId: player.userId,
+                            senderName: player.username,
+                            content: chatData.content,
+                            timestamp: Date.now()
+                        });
+                        dispatcher.broadcastMessage(OpCode.CHAT, payload);
+                    } catch (e) {
+                        if (logger) logger.error(`Error parsing CHAT message: ${e.message}`);
+                    }
+                    break;
+            }
+        }
+
+        // Only run game engine if in_game
+        if (state.phase !== "in_game") {
+            return { state };
+        }
+
         const inputs = ClientMessages.decodeMessages(messages, logger);
 
         const gameInputs = [];

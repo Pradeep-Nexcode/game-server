@@ -1,4 +1,10 @@
 var OpCode = {
+    // Phase 2: Lobby & Core
+    CHAT: 1,
+    READY_TOGGLE: 2,
+    START_GAME: 3,
+    LOBBY_STATE_UPDATE: 100,
+
     // Server -> Client
     ERROR: 0,
     STATE_UPDATE: 1,
